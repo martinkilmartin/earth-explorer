@@ -1,0 +1,36 @@
+[
+  {
+    "id": "montreal",
+    "name": "Montreal",
+    "country": "Canada",
+    "lat": 45.5017,
+    "lng": -73.5673,
+    "culture": "Canadian/French",
+    "language": "French/English",
+    "words": [
+      { "english": "Hello", "local": "Bonjour" },
+      { "english": "Thank you", "local": "Merci" }
+    ],
+    "activities": [
+      { "id": "poutine", "name": "Make Poutine", "type": "game", "content": "Interactive cooking game" }
+    ],
+    "unlocked": true
+  },
+  {
+    "id": "dublin",
+    "name": "Dublin",
+    "country": "Ireland",
+    "lat": 53.3498,
+    "lng": -6.2603,
+    "culture": "Irish",
+    "language": "Irish/English",
+    "words": [
+      { "english": "Hello", "local": "Dia duit" },
+      { "english": "Thank you", "local": "Go raibh maith agat" }
+    ],
+    "activities": [
+      { "id": "shamrock", "name": "Find the Shamrock", "type": "game", "content": "Treasure hunt game" }
+    ],
+    "unlocked": false
+  }
+]

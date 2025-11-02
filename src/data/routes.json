@@ -1,0 +1,8 @@
+[
+  {
+    "from": "montreal",
+    "to": "dublin",
+    "type": "plane",
+    "distance": 5000
+  }
+]
