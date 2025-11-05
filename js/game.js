@@ -1,6 +1,10 @@
+/// <reference path="../types/phaser.d.ts" />
+// @ts-check
+
 import { createCountryColorResolver } from './countryColors.js';
 
-const Phaser = window.Phaser;
+/** @type {any} */
+const Phaser = /** @type {any} */ (window).Phaser;
 
 if (!Phaser) {
   throw new Error('Phaser library is required before loading game.js');
@@ -9,6 +13,23 @@ if (!Phaser) {
 const selectionDetailsEl = document.getElementById('selectionDetails');
 const loadingScreenEl = document.getElementById('loadingScreen');
 const resetViewBtn = document.getElementById('resetView');
+
+/**
+ * @typedef {Object} ProjectedSegment
+ * @property {{ x: number, y: number }[]} points
+ * @property {{ graphics: any, points: { x: number, y: number }[] }=} graphics
+ */
+
+/**
+ * @typedef {Object} ProjectedCountry
+ * @property {string} name
+ * @property {string} iso3
+ * @property {string} iso2
+ * @property {number} baseColor
+ * @property {number} highlightColor
+ * @property {ProjectedSegment[]} segments
+ * @property {{ graphics: any, points: { x: number, y: number }[] }[]=} graphics
+ */
 
 async function loadWorldData() {
   try {
@@ -27,11 +48,15 @@ async function loadWorldData() {
 }
 
 class EarthExplorerGame {
+  /**
+   * @param {{ features?: any[] }} worldGeoJson
+   */
   constructor(worldGeoJson) {
     this.worldGeoJson = worldGeoJson;
     this.game = null;
     this.scene = null;
     this.worldContainer = null;
+    /** @type {ProjectedCountry[]} */
     this.projectedCountries = [];
     this.hoveredCountry = null;
     this.activeCountry = null;
@@ -44,6 +69,14 @@ class EarthExplorerGame {
     this.startPinchZoom = null;
     this.worldBounds = new Phaser.Geom.Rectangle(0, 0, 0, 0);
     this.colorResolver = createCountryColorResolver();
+  }
+
+  /**
+   * @param {{ x: number, y: number }} a
+   * @param {{ x: number, y: number }} b
+   */
+  getMidpoint(a, b) {
+    return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
   }
 
   init() {
@@ -73,7 +106,7 @@ class EarthExplorerGame {
       }
     };
 
-    this.game = new Phaser.Game(config);
+    this.game = new (Phaser).Game(config);
   }
 
   handlePreload(scene) {
@@ -100,7 +133,10 @@ class EarthExplorerGame {
     }
   }
 
-  handleUpdate() {
+  /**
+   * @param {number} [delta]
+   */
+  handleUpdate(delta) {
     if (this.isPinching) {
       const activePointers = this.getActivePointers();
       if (activePointers.length >= 2) {
@@ -219,7 +255,7 @@ class EarthExplorerGame {
       const name = feature.properties?.name || 'Unknown region';
       const iso3 = feature.properties?.['ISO3166-1-Alpha-3'] || 'UNK';
       const iso2 = feature.properties?.['ISO3166-1-Alpha-2'] || 'UN';
-      const geometry = feature.geometry;
+      const geometry = /** @type {any} */ (feature.geometry);
       if (!geometry) return;
 
       const baseColor = this.colorResolver({ name, iso2, iso3 });

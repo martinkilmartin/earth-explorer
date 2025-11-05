@@ -1,4 +1,6 @@
-const PhaserRef = window?.Phaser;
+// @ts-check
+
+const PhaserRef = /** @type {any} */ (window).Phaser;
 
 if (!PhaserRef) {
   throw new Error('Phaser must be available before loading countryColors.js');

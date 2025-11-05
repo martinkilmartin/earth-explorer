@@ -1,3 +1,5 @@
+// @ts-check
+
 const CACHE_NAME = 'earth-explorer-v1';
 const PRECACHE_URLS = [
   '/',
@@ -10,13 +12,15 @@ const PRECACHE_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  event.waitUntil(
+  const installEvent = /** @type {any} */ (event);
+  installEvent.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(PRECACHE_URLS))
   );
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(
+  const activateEvent = /** @type {any} */ (event);
+  activateEvent.waitUntil(
     caches.keys().then(cacheNames =>
       Promise.all(
         cacheNames
@@ -28,9 +32,10 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(response =>
-      response || fetch(event.request)
+  const fetchEvent = /** @type {any} */ (event);
+  fetchEvent.respondWith(
+    caches.match(fetchEvent.request).then(response =>
+      response || fetch(fetchEvent.request)
     )
   );
 });

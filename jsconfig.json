@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "checkJs": true,
+    "allowJs": true,
+    "moduleResolution": "Node",
+    "lib": ["ES2020", "DOM"],
+    "baseUrl": ".",
+    "paths": {
+      "*": ["*", "src/*"]
+    }
+  },
+  "include": [
+    "js/**/*.js",
+    "sw.js",
+    "src/**/*.js"
+  ]
+}
