@@ -1,0 +1,65 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Canada",
+        "ISO3166-1-Alpha-3": "CAN",
+        "ISO3166-1-Alpha-2": "CA"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-140.0, 42.0],
+            [-52.0, 42.0],
+            [-52.0, 70.0],
+            [-140.0, 70.0],
+            [-140.0, 42.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "United States of America",
+        "ISO3166-1-Alpha-3": "USA",
+        "ISO3166-1-Alpha-2": "US"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-125.0, 24.0],
+            [-66.0, 24.0],
+            [-66.0, 49.0],
+            [-125.0, 49.0],
+            [-125.0, 24.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Mexico",
+        "ISO3166-1-Alpha-3": "MEX",
+        "ISO3166-1-Alpha-2": "MX"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-118.0, 14.0],
+            [-86.0, 14.0],
+            [-86.0, 33.0],
+            [-118.0, 33.0],
+            [-118.0, 14.0]
+          ]
+        ]
+      }
+    }
+  ]
+}

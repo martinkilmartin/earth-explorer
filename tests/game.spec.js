@@ -1,26 +1,28 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { EarthExplorerGame, bootstrapGame } from '../js/game.js';
+import worldFixture from './fixtures/world_small.geo.json' assert { type: 'json' };
 
-function createFixtureFeature() {
+function deepClone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function cloneFeatureByIso3(iso3) {
+  const feature = worldFixture.features.find(item => item.properties?.['ISO3166-1-Alpha-3'] === iso3);
+  return deepClone(feature ?? worldFixture.features[0]);
+}
+
+function buildWorldCollection(...iso3Codes) {
+  const codes = iso3Codes.length ? iso3Codes : worldFixture.features.map(item => item.properties?.['ISO3166-1-Alpha-3']);
   return {
-    type: 'Feature',
-    properties: {
-      name: 'Testland',
-      'ISO3166-1-Alpha-3': 'TST',
-      'ISO3166-1-Alpha-2': 'TS'
-    },
-    geometry: {
-      type: 'Polygon',
-      coordinates: [
-        [
-          [-10, -10],
-          [10, -10],
-          [10, 10],
-          [-10, 10],
-          [-10, -10]
-        ]
-      ]
-    }
+    type: 'FeatureCollection',
+    features: codes.map(code => cloneFeatureByIso3(code))
+  };
+}
+
+function cloneWorldFixture() {
+  return {
+    type: 'FeatureCollection',
+    features: worldFixture.features.map(feature => deepClone(feature))
   };
 }
 
@@ -70,14 +72,14 @@ describe('EarthExplorerGame', () => {
   });
 
   it('projects GeoJSON data into normalized segments and world bounds', () => {
-    const worldGeoJson = { type: 'FeatureCollection', features: [createFixtureFeature()] };
+    const worldGeoJson = buildWorldCollection('USA');
     const game = new EarthExplorerGame(worldGeoJson);
 
     game.prepareWorldAtlas();
 
     expect(game.projectedCountries).toHaveLength(1);
     const country = game.projectedCountries[0];
-    expect(country.name).toBe('Testland');
+    expect(country.name).toBe('United States of America');
     expect(country.segments[0].points.length).toBeGreaterThan(3);
     expect(game.worldBounds.width).toBeGreaterThan(0);
     expect(game.worldBounds.height).toBeGreaterThan(0);
@@ -86,7 +88,7 @@ describe('EarthExplorerGame', () => {
   });
 
   it('updates selection details when hovering or selecting a country', () => {
-    const worldGeoJson = { type: 'FeatureCollection', features: [createFixtureFeature()] };
+    const worldGeoJson = buildWorldCollection('USA');
     const game = new EarthExplorerGame(worldGeoJson);
     const selection = document.getElementById('selectionDetails');
 
@@ -105,7 +107,7 @@ describe('EarthExplorerGame', () => {
   });
 
   it('filters active pointers to those currently pressed', () => {
-    const worldGeoJson = { type: 'FeatureCollection', features: [] };
+    const worldGeoJson = buildWorldCollection();
     const game = new EarthExplorerGame(worldGeoJson);
 
     game.scene = {
@@ -125,7 +127,7 @@ describe('EarthExplorerGame', () => {
   });
 
   it('draws world graphics and refreshes styles for hover and selection', () => {
-    const worldGeoJson = { type: 'FeatureCollection', features: [createFixtureFeature()] };
+    const worldGeoJson = buildWorldCollection('USA');
     const game = new EarthExplorerGame(worldGeoJson);
     const container = new ContainerStub();
     const graphicsCreated = [];
@@ -159,7 +161,7 @@ describe('EarthExplorerGame', () => {
   });
 
   it('clamps zoom and constrains pan based on bounds', () => {
-    const worldGeoJson = { type: 'FeatureCollection', features: [createFixtureFeature()] };
+    const worldGeoJson = buildWorldCollection('USA');
     const game = new EarthExplorerGame(worldGeoJson);
     const container = new ContainerStub();
 
@@ -195,7 +197,7 @@ describe('EarthExplorerGame', () => {
   });
 
   it('resets view and clears active country', () => {
-    const worldGeoJson = { type: 'FeatureCollection', features: [createFixtureFeature()] };
+    const worldGeoJson = buildWorldCollection('USA');
     const game = new EarthExplorerGame(worldGeoJson);
     const container = new ContainerStub();
 
@@ -216,7 +218,7 @@ describe('EarthExplorerGame', () => {
   });
 
   it('handles pinch gesture updates', () => {
-    const worldGeoJson = { type: 'FeatureCollection', features: [] };
+    const worldGeoJson = buildWorldCollection();
     const game = new EarthExplorerGame(worldGeoJson);
     game.isPinching = true;
     game.startPinchDistance = 5;
@@ -237,7 +239,7 @@ describe('EarthExplorerGame', () => {
   });
 
   it('initialises via init and wires handlers during scene lifecycle', () => {
-    const worldGeoJson = { type: 'FeatureCollection', features: [createFixtureFeature()] };
+    const worldGeoJson = buildWorldCollection('USA');
     const game = new EarthExplorerGame(worldGeoJson);
     const originalGameClass = window.Phaser.Game;
     let capturedConfig = null;
@@ -326,7 +328,7 @@ describe('EarthExplorerGame', () => {
   });
 
   it('gracefully skips drawing when scene is unavailable', () => {
-    const worldGeoJson = { type: 'FeatureCollection', features: [createFixtureFeature()] };
+    const worldGeoJson = buildWorldCollection('USA');
     const game = new EarthExplorerGame(worldGeoJson);
     game.worldContainer = new ContainerStub();
     expect(() => game.drawWorld()).not.toThrow();
@@ -339,7 +341,7 @@ describe('EarthExplorerGame', () => {
   });
 
   it('ignores hover updates when country already active', () => {
-    const worldGeoJson = { type: 'FeatureCollection', features: [createFixtureFeature()] };
+    const worldGeoJson = buildWorldCollection('USA');
     const game = new EarthExplorerGame(worldGeoJson);
     game.prepareWorldAtlas();
     const country = game.projectedCountries[0];
@@ -364,17 +366,12 @@ describe('EarthExplorerGame', () => {
   });
 
   it('ignores features without geometry in prepareWorldAtlas', () => {
-    const worldGeoJson = {
-      type: 'FeatureCollection',
-      features: [
-        createFixtureFeature(),
-        {
-          type: 'Feature',
-          properties: { name: 'EmptyLand', 'ISO3166-1-Alpha-3': 'EMP', 'ISO3166-1-Alpha-2': 'EL' },
-          geometry: null
-        }
-      ]
-    };
+    const worldGeoJson = cloneWorldFixture();
+    worldGeoJson.features.push({
+      type: 'Feature',
+      properties: { name: 'EmptyLand', 'ISO3166-1-Alpha-3': 'EMP', 'ISO3166-1-Alpha-2': 'EL' },
+      geometry: null
+    });
     const game = new EarthExplorerGame(worldGeoJson);
 
     game.prepareWorldAtlas();
@@ -385,7 +382,7 @@ describe('EarthExplorerGame', () => {
   it('updateSelectionDetails skips DOM work when selection element missing', () => {
     const original = document.getElementById('selectionDetails');
     original?.remove();
-    const worldGeoJson = { type: 'FeatureCollection', features: [createFixtureFeature()] };
+    const worldGeoJson = buildWorldCollection('USA');
     const game = new EarthExplorerGame(worldGeoJson);
     game.prepareWorldAtlas();
 
@@ -408,10 +405,7 @@ describe('bootstrapGame', () => {
   it('loads data and returns an initialised game instance', async () => {
     const originalFetch = globalThis.fetch;
     const originalGameClass = window.Phaser.Game;
-    const fixture = {
-      type: 'FeatureCollection',
-      features: [createFixtureFeature()]
-    };
+    const fixture = buildWorldCollection('USA');
     const inputHandlers = {};
 
     globalThis.fetch = vi.fn().mockResolvedValue({
