@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1f6feb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/style.css">
+  <title>Earth Explorer</title>
+</head>
+<body>
+  <div id="gameContainer">
+    <div class="ui-panel" id="infoPanel">
+      <div class="ui-header">
+        <span class="logo">Earth Explorer</span>
+        <button id="resetView" aria-label="Reset view">⟳</button>
+      </div>
+      <div class="ui-body">
+        <p class="lead">Drag to explore. Pinch or scroll to zoom. Tap countries to learn more.</p>
+        <div id="selectionDetails">Loading world data…</div>
+      </div>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <div class="loading" id="loadingScreen">
+      <div class="spinner"></div>
+      <div class="loading-text">Spinning up your world…</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
+  <script src="js/game.js" type="module"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => {
+          console.warn('Service worker registration failed', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
