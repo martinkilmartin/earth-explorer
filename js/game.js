@@ -1,3 +1,5 @@
+import { createCountryColorResolver } from './countryColors.js';
+
 const Phaser = window.Phaser;
 
 if (!Phaser) {
@@ -41,6 +43,7 @@ class EarthExplorerGame {
     this.startPinchDistance = null;
     this.startPinchZoom = null;
     this.worldBounds = new Phaser.Geom.Rectangle(0, 0, 0, 0);
+    this.colorResolver = createCountryColorResolver();
   }
 
   init() {
@@ -212,24 +215,15 @@ class EarthExplorerGame {
       }
     };
 
-    const colorForName = name => {
-      let hash = 0;
-      for (let i = 0; i < name.length; i += 1) {
-        hash = (hash << 5) - hash + name.charCodeAt(i);
-        hash |= 0;
-      }
-      const hue = ((hash % 360) + 360) % 360;
-      return Phaser.Display.Color.HSLToColor(hue / 360, 0.52, 0.45).color;
-    };
-
     features.forEach(feature => {
       const name = feature.properties?.name || 'Unknown region';
       const iso3 = feature.properties?.['ISO3166-1-Alpha-3'] || 'UNK';
+      const iso2 = feature.properties?.['ISO3166-1-Alpha-2'] || 'UN';
       const geometry = feature.geometry;
       if (!geometry) return;
 
-      const baseColor = colorForName(name);
-      const highlightColor = Phaser.Display.Color.IntegerToColor(baseColor).clone().lighten(20).color;
+      const baseColor = this.colorResolver({ name, iso2, iso3 });
+      const highlightColor = Phaser.Display.Color.IntegerToColor(baseColor).clone().lighten(18).color;
 
       const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
       const segments = [];
@@ -256,7 +250,7 @@ class EarthExplorerGame {
       this.projectedCountries.push({
         name,
         iso3,
-        iso2: feature.properties?.['ISO3166-1-Alpha-2'] || 'UN',
+        iso2,
         baseColor,
         highlightColor,
         segments
@@ -316,6 +310,8 @@ class EarthExplorerGame {
         return { graphics, points: segment.points };
       });
     });
+
+    this.refreshCountryStyles();
 
     if (!this.projectedCountries.length && selectionDetailsEl) {
       selectionDetailsEl.textContent = 'No countries were available in the dataset.';
@@ -466,19 +462,6 @@ class EarthExplorerGame {
     return pointers.filter(pointer => pointer && pointer.isDown);
   }
 
-  getMidpoint(a, b) {
-    return new Phaser.Math.Vector2((a.x + b.x) / 2, (a.y + b.y) / 2);
-  }
-
-  setHoveredCountry(country) {
-    if (this.hoveredCountry === country || this.activeCountry === country) return;
-    this.hoveredCountry = country;
-    this.refreshCountryStyles();
-    if (!this.activeCountry) {
-      this.updateSelectionDetails(country, 'hover');
-    }
-  }
-
   setActiveCountry(country) {
     this.activeCountry = country;
     if (!country) {
@@ -486,19 +469,18 @@ class EarthExplorerGame {
     } else {
       this.updateSelectionDetails(country, 'select');
     }
-    this.refreshCountryStyles(true);
+    this.refreshCountryStyles();
   }
 
-  refreshCountryStyles(force = false) {
-    const highlight = this.activeCountry || this.hoveredCountry;
+  refreshCountryStyles() {
+    const highlightCountry = this.activeCountry || this.hoveredCountry;
 
     this.projectedCountries.forEach(country => {
-      const color = country === highlight ? country.highlightColor : country.baseColor;
-      if (!force && country === highlight) {
-        // Already redrawn when selected
-      }
+      const fillColor = country === highlightCountry ? country.highlightColor : country.baseColor;
+      const outlineAlpha = country === highlightCountry ? 0.32 : 0.18;
+
       country.graphics?.forEach(segment => {
-        this.renderSegment(segment.graphics, segment.points, color, country === highlight ? 0.35 : 0.18);
+        this.renderSegment(segment.graphics, segment.points, fillColor, outlineAlpha);
       });
     });
   }
