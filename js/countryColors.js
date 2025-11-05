@@ -96,14 +96,24 @@ export function createCountryColorResolver(extraOverrides = {}) {
   });
 
   const usedGeneratedColors = new Set();
+  const regionCache = new Map();
 
   return ({ name = 'Unknown region', iso2 = '', iso3 = '' }) => {
-    const candidates = [normalizeCode(iso3), normalizeCode(iso2)];
+    const normalizedIso3 = normalizeCode(iso3);
+    const normalizedIso2 = normalizeCode(iso2);
+    const cacheKey = `${normalizedIso3}:${normalizedIso2}:${name}`;
+
+    if (regionCache.has(cacheKey)) {
+      return regionCache.get(cacheKey);
+    }
+
+    const candidates = [normalizedIso3, normalizedIso2];
     for (const code of candidates) {
       if (!code) continue;
       const override = overrides[code];
       if (override !== undefined) {
         usedGeneratedColors.add(override);
+        regionCache.set(cacheKey, override);
         return override;
       }
     }
@@ -119,6 +129,7 @@ export function createCountryColorResolver(extraOverrides = {}) {
     }
 
     usedGeneratedColors.add(color);
+    regionCache.set(cacheKey, color);
     return color;
   };
 }

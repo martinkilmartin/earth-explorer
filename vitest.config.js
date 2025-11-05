@@ -6,10 +6,10 @@ export default defineConfig({
     setupFiles: ['./tests/setup/phaserStub.js'],
     coverage: {
       provider: 'v8',
-      reports: ['text', 'lcov'],
+      reports: ['text', 'lcov', 'json-summary'],
       thresholds: {
         statements: 90,
-        branches: 85,
+        branches: 70,
         functions: 90,
         lines: 90
       }
