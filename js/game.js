@@ -47,7 +47,7 @@ async function loadWorldData() {
   }
 }
 
-class EarthExplorerGame {
+export class EarthExplorerGame {
   /**
    * @param {{ features?: any[] }} worldGeoJson
    */
@@ -572,11 +572,19 @@ class EarthExplorerGame {
   }
 }
 
-const worldGeoJson = await loadWorldData();
-const earthExplorerGame = new EarthExplorerGame(worldGeoJson);
-earthExplorerGame.init();
+export async function bootstrapGame() {
+  const worldGeoJson = await loadWorldData();
+  const earthExplorerGame = new EarthExplorerGame(worldGeoJson);
+  earthExplorerGame.init();
 
-window.addEventListener('beforeunload', () => {
-  earthExplorerGame.game?.destroy(true);
-});
+  window.addEventListener('beforeunload', () => {
+    earthExplorerGame.game?.destroy(true);
+  });
+
+  return earthExplorerGame;
+}
+
+if (typeof window !== 'undefined' && window.document && !(/** @type {any} */ (window)).__EARTH_EXPLORER_TEST__) {
+  bootstrapGame();
+}
 
