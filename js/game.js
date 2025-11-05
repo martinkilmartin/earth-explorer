@@ -53,7 +53,7 @@ class EarthExplorerGame {
       type: Phaser.CANVAS,
       parent: 'gameContainer',
       canvas: document.getElementById('gameCanvas'),
-      backgroundColor: '#02111d',
+      backgroundColor: '#153654',
       scale: {
         mode: Phaser.Scale.RESIZE,
         autoCenter: Phaser.Scale.CENTER_BOTH,
@@ -462,6 +462,23 @@ class EarthExplorerGame {
     return pointers.filter(pointer => pointer && pointer.isDown);
   }
 
+  setHoveredCountry(country) {
+    if (this.hoveredCountry === country || this.activeCountry === country) {
+      return;
+    }
+
+    this.hoveredCountry = country;
+    this.refreshCountryStyles();
+
+    if (!this.activeCountry) {
+      if (country) {
+        this.updateSelectionDetails(country, 'hover');
+      } else {
+        this.updateSelectionDetails(null, 'reset');
+      }
+    }
+  }
+
   setActiveCountry(country) {
     this.activeCountry = country;
     if (!country) {
@@ -473,11 +490,20 @@ class EarthExplorerGame {
   }
 
   refreshCountryStyles() {
-    const highlightCountry = this.activeCountry || this.hoveredCountry;
+    const activeCountry = this.activeCountry;
+    const hoveredCountry = this.hoveredCountry;
 
     this.projectedCountries.forEach(country => {
-      const fillColor = country === highlightCountry ? country.highlightColor : country.baseColor;
-      const outlineAlpha = country === highlightCountry ? 0.32 : 0.18;
+      let fillColor = country.baseColor;
+      let outlineAlpha = 0.18;
+
+      if (country === activeCountry) {
+        fillColor = country.highlightColor;
+        outlineAlpha = 0.38;
+      } else if (country === hoveredCountry) {
+        fillColor = Phaser.Display.Color.IntegerToColor(country.baseColor).clone().lighten(28).color;
+        outlineAlpha = 0.26;
+      }
 
       country.graphics?.forEach(segment => {
         this.renderSegment(segment.graphics, segment.points, fillColor, outlineAlpha);
