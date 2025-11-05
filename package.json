@@ -5,9 +5,13 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest",
-    "test:unit": "vitest run --coverage"
+    "test:unit": "vitest run --coverage",
+    "test:ui": "playwright test",
+    "test:ui:headful": "playwright test --headed"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "@types/node": "^20.11.30",
     "@vitest/coverage-v8": "^1.6.1",
     "happy-dom": "^13.3.2",
     "typescript": "^5.3.3",

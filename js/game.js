@@ -577,6 +577,11 @@ export async function bootstrapGame() {
   const earthExplorerGame = new EarthExplorerGame(worldGeoJson);
   earthExplorerGame.init();
 
+  if (typeof window !== 'undefined') {
+    /** @type {any} */ (window).__EARTH_EXPLORER_GAME__ = earthExplorerGame;
+    /** @type {any} */ (window).__EARTH_EXPLORER_READY__ = true;
+  }
+
   window.addEventListener('beforeunload', () => {
     earthExplorerGame.game?.destroy(true);
   });

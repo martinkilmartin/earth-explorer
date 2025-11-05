@@ -4,6 +4,8 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     setupFiles: ['./tests/setup/phaserStub.js'],
+    include: ['tests/**/*.spec.js'],
+    exclude: ['tests/e2e/**/*'],
     coverage: {
       provider: 'v8',
       reports: ['text', 'lcov', 'json-summary'],
