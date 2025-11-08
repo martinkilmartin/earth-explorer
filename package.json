@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "dev": "python3 server.py",
+    "serve": "python3 server.py",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:unit": "vitest run --coverage",
@@ -11,11 +13,11 @@
     "ci": "npm run typecheck && npm run test:unit && npm run test:ui"
   },
   "devDependencies": {
-    "@playwright/test": "^1.49.1",
-    "@types/node": "^20.11.30",
-    "@vitest/coverage-v8": "^1.6.1",
-    "happy-dom": "^13.3.2",
-    "typescript": "^5.3.3",
-    "vitest": "^1.5.0"
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^22.19.0",
+    "@vitest/coverage-v8": "^4.0.8",
+    "happy-dom": "^20.0.10",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.8"
   }
 }

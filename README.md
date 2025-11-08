@@ -2,9 +2,16 @@
 
 ## Prerequisites
 
-- Node.js 18+
+- Python 3.6+ (for local development server)
+- Node.js 18+ (for testing and type checking)
 - `npm install`
 - Required browsers for Playwright (`npx playwright install`)
+
+## Development
+
+- `npm run dev` or `npm run serve` – start Python HTTP server at <http://127.0.0.1:8000>
+  - Customize with `PORT` and `HOST` environment variables
+  - Example: `PORT=3000 npm run dev`
 
 ## Available Scripts
 
