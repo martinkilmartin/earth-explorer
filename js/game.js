@@ -10,7 +10,6 @@ if (!Phaser) {
   throw new Error('Phaser library is required before loading game.js');
 }
 
-const selectionDetailsEl = document.getElementById('selectionDetails');
 const loadingScreenEl = document.getElementById('loadingScreen');
 const resetViewBtn = document.getElementById('resetView');
 
@@ -40,9 +39,6 @@ async function loadWorldData() {
     return await response.json();
   } catch (error) {
     console.error(error);
-    if (selectionDetailsEl) {
-      selectionDetailsEl.textContent = 'Unable to load world data. Check your connection and reload the page.';
-    }
     throw error;
   }
 }
@@ -60,6 +56,7 @@ export class EarthExplorerGame {
     this.projectedCountries = [];
     this.hoveredCountry = null;
     this.activeCountry = null;
+    this.activeCountryText = null;
     this.zoom = 1;
     this.baseScale = 1;
     this.isDragging = false;
@@ -349,8 +346,8 @@ export class EarthExplorerGame {
 
     this.refreshCountryStyles();
 
-    if (!this.projectedCountries.length && selectionDetailsEl) {
-      selectionDetailsEl.textContent = 'No countries were available in the dataset.';
+    if (!this.projectedCountries.length) {
+      console.warn('No countries were available in the dataset.');
     }
   }
 
@@ -505,24 +502,85 @@ export class EarthExplorerGame {
 
     this.hoveredCountry = country;
     this.refreshCountryStyles();
-
-    if (!this.activeCountry) {
-      if (country) {
-        this.updateSelectionDetails(country, 'hover');
-      } else {
-        this.updateSelectionDetails(null, 'reset');
-      }
-    }
   }
 
   setActiveCountry(country) {
     this.activeCountry = country;
-    if (!country) {
-      this.updateSelectionDetails(null, 'reset');
-    } else {
-      this.updateSelectionDetails(country, 'select');
+    
+    // Remove existing country text if any
+    if (this.activeCountryText) {
+      this.activeCountryText.destroy();
+      this.activeCountryText = null;
     }
+    
+    if (country && this.scene && this.scene.scale) {
+      // Calculate country center from all segments
+      let totalX = 0;
+      let totalY = 0;
+      let totalPoints = 0;
+      
+      country.segments.forEach(segment => {
+        segment.points.forEach(point => {
+          totalX += point.x;
+          totalY += point.y;
+          totalPoints++;
+        });
+      });
+      
+      if (totalPoints > 0) {
+        const centerX = totalX / totalPoints;
+        const centerY = totalY / totalPoints;
+        
+        // Zoom to country
+        this.zoomToCountry(country, centerX, centerY);
+      }
+    }
+    
     this.refreshCountryStyles();
+  }
+  
+  zoomToCountry(country, centerX, centerY) {
+    if (!this.scene || !this.scene.scale) return;
+    
+    // Calculate bounds of the country
+    let minX = Infinity, maxX = -Infinity;
+    let minY = Infinity, maxY = -Infinity;
+    
+    country.segments.forEach(segment => {
+      segment.points.forEach(point => {
+        minX = Math.min(minX, point.x);
+        maxX = Math.max(maxX, point.x);
+        minY = Math.min(minY, point.y);
+        maxY = Math.max(maxY, point.y);
+      });
+    });
+    
+    const countryWidth = maxX - minX;
+    const countryHeight = maxY - minY;
+    
+    // Calculate zoom to fit country with some padding
+    const screenWidth = this.scene.scale.width;
+    const screenHeight = this.scene.scale.height;
+    const padding = 100;
+    
+    const scaleX = (screenWidth - padding * 2) / countryWidth;
+    const scaleY = (screenHeight - padding * 2) / countryHeight;
+    const targetZoom = Math.min(scaleX, scaleY) * 0.8; // 0.8 for extra padding
+    
+    // Clamp zoom to reasonable limits
+    const minZoom = this.baseScale * 0.35;
+    const maxZoom = this.baseScale * 999;
+    const newZoom = Phaser.Math.Clamp(targetZoom, minZoom, maxZoom);
+    
+    // Animate zoom and pan
+    this.zoom = newZoom;
+    this.worldContainer.setScale(this.zoom);
+    
+    // Position the country in the center of the screen
+    this.worldContainer.x = screenWidth / 2 - centerX * this.zoom;
+    this.worldContainer.y = screenHeight / 2 - centerY * this.zoom;
+    
+    this.constrainPan();
   }
 
   refreshCountryStyles() {
@@ -545,30 +603,6 @@ export class EarthExplorerGame {
         this.renderSegment(segment.graphics, segment.points, fillColor, outlineAlpha);
       });
     });
-  }
-
-  updateSelectionDetails(country, mode) {
-    if (!selectionDetailsEl) return;
-
-    if (!country) {
-      selectionDetailsEl.innerHTML = '<strong>World sandbox ready.</strong><br>Drag the map, zoom in, then tap a country to explore it.';
-      return;
-    }
-
-    const title = mode === 'select' ? 'Selected' : 'Exploring';
-    const isoCodes = [country.iso3, country.iso2].filter(Boolean).join(' · ');
-    const segmentCount = country.segments?.length ?? 0;
-
-    selectionDetailsEl.innerHTML = `
-      <div class="country-detail">
-        <span class="eyebrow">${title}</span>
-        <h3>${country.name}</h3>
-        <dl>
-          <div><dt>Codes</dt><dd>${isoCodes}</dd></div>
-          <div><dt>Regions</dt><dd>${segmentCount}</dd></div>
-        </dl>
-      </div>
-    `;
   }
 }
 

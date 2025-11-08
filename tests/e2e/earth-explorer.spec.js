@@ -31,35 +31,40 @@ test.describe('Earth Explorer UI smoke tests', () => {
     expect(knownCountry).not.toBeNull();
   });
 
-  test('updates selection panel on hover and selection', async ({ page }) => {
-    const selection = page.locator('#selectionDetails');
-
-    const hoverName = await page.evaluate(() => {
+  test('zooms to country and displays label on selection', async ({ page }) => {
+    const { zoomChanged, hasText, countryName } = await page.evaluate(() => {
       const game = window.__EARTH_EXPLORER_GAME__;
-      const target = game.projectedCountries.find(country => country.iso3 === 'USA') ?? game.projectedCountries[0];
-      game.setHoveredCountry(target);
-      return target.name;
-    });
-
-    await expect(selection).toContainText('Exploring');
-    await expect(selection).toContainText(hoverName);
-
-    const selectedName = await page.evaluate(() => {
-      const game = window.__EARTH_EXPLORER_GAME__;
-      const target = game.projectedCountries.find(country => country.iso3 === 'USA') ?? game.projectedCountries[0];
+      const target = game.projectedCountries.find(country => country.iso3 === 'JPN') ?? game.projectedCountries[0];
+      
+      const before = game.zoom;
       game.setActiveCountry(target);
-      return target.name;
+      const after = game.zoom;
+      
+      return {
+        zoomChanged: Math.abs(before - after) > 0.001,
+        hasText: game.activeCountryText !== null,
+        countryName: target.name
+      };
     });
 
-    await expect(selection).toContainText('Selected');
-    await expect(selection).toContainText(selectedName);
+    expect(zoomChanged).toBe(true);
+    expect(hasText).toBe(true);
+    expect(countryName).toBeTruthy();
 
+    // Clear selection
     await page.evaluate(() => {
       const game = window.__EARTH_EXPLORER_GAME__;
       game.setActiveCountry(null);
     });
 
-    await expect(selection).toContainText('World sandbox ready');
+    const { hasTextAfterClear } = await page.evaluate(() => {
+      const game = window.__EARTH_EXPLORER_GAME__;
+      return {
+        hasTextAfterClear: game.activeCountryText !== null
+      };
+    });
+
+    expect(hasTextAfterClear).toBe(false);
   });
 
   test('supports zoom controls and reset view button', async ({ page }) => {

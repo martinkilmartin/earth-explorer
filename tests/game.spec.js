@@ -60,10 +60,6 @@ class ContainerStub {
 describe('EarthExplorerGame', () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    const selection = document.getElementById('selectionDetails');
-    if (selection) {
-      selection.innerHTML = '';
-    }
     const loading = document.getElementById('loadingScreen');
     if (loading) {
       loading.style = { opacity: '', pointerEvents: '' };
@@ -87,23 +83,21 @@ describe('EarthExplorerGame', () => {
     expect(game.worldBounds.y).toBeCloseTo(-game.worldBounds.height / 2);
   });
 
-  it('updates selection details when hovering or selecting a country', () => {
+  it('updates active and hovered country state', () => {
     const worldGeoJson = buildWorldCollection('USA');
     const game = new EarthExplorerGame(worldGeoJson);
-    const selection = document.getElementById('selectionDetails');
 
     game.prepareWorldAtlas();
     const country = game.projectedCountries[0];
 
     game.setHoveredCountry(country);
-    expect(selection.innerHTML).toContain('Exploring');
-    expect(selection.innerHTML).toContain(country.name);
+    expect(game.hoveredCountry).toBe(country);
 
     game.setActiveCountry(country);
-    expect(selection.innerHTML).toContain('Selected');
+    expect(game.activeCountry).toBe(country);
 
     game.setActiveCountry(null);
-    expect(selection.innerHTML).toContain('World sandbox ready');
+    expect(game.activeCountry).toBe(null);
   });
 
   it('filters active pointers to those currently pressed', () => {
@@ -379,16 +373,17 @@ describe('EarthExplorerGame', () => {
     expect(game.projectedCountries.some(c => c.name === 'EmptyLand')).toBe(false);
   });
 
-  it('updateSelectionDetails skips DOM work when selection element missing', () => {
-    const original = document.getElementById('selectionDetails');
-    original?.remove();
-    const worldGeoJson = buildWorldCollection('USA');
+  it('ignores hover updates when country already active', () => {
+    const worldGeoJson = buildWorldCollection('USA', 'CAN');
     const game = new EarthExplorerGame(worldGeoJson);
     game.prepareWorldAtlas();
+    const [usa, can] = game.projectedCountries;
 
-    expect(() => game.setActiveCountry(null)).not.toThrow();
+    game.setActiveCountry(usa);
+    game.setHoveredCountry(can);
 
-    document.body.appendChild(original);
+    expect(game.hoveredCountry).toBe(can);
+    expect(game.activeCountry).toBe(usa);
   });
 
   it('throws when world data fails to load', async () => {

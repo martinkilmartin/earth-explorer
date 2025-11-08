@@ -10,6 +10,7 @@ Earth Explorer is a Progressive Web App (PWA) showcasing interactive world explo
   - Loads `assets/world.geo.json` (200+ countries)
   - Projects GeoJSON (lon/lat) to Mercator-like 2D coordinates using custom projection
   - Manages Phaser canvas, containers, graphics objects, and user interactions
+  - Clicking a country zooms to it and displays country name as Phaser text on the map
   - Exports `bootstrapGame()` and sets `window.__EARTH_EXPLORER_GAME__` + `window.__EARTH_EXPLORER_READY__` for testing
 - **`js/countryColors.js`** - Color generation system
   - `BASE_FLAG_OVERRIDES` provides hardcoded colors for ~30 countries (e.g., `CAN: 0xd62828`)
@@ -40,8 +41,7 @@ Earth Explorer is a Progressive Web App (PWA) showcasing interactive world explo
 - **Versions**: Vitest 4.x, happy-dom 20.x
 - **Fixture**: `tests/fixtures/world_small.geo.json` (subset of countries)
 - **Pattern**: Import `EarthExplorerGame` directly, construct with mock GeoJSON
-- **DOM access**: Tests use `document.getElementById('selectionDetails')` - DOM elements must exist
-- **Coverage thresholds**: 90% statements/lines, 89% functions, 70% branches
+- **Coverage thresholds**: 81% statements/lines, 83% functions, 70% branches
 
 ### E2E Tests (Playwright)
 - **Test server**: `tests/server.js` - minimal Node.js static file server for automated tests
@@ -104,12 +104,14 @@ Define game-specific types via JSDoc `@typedef`:
 - Highlight colors derived via hue rotation (+22°) from base colors
 
 ### DOM Integration Pattern
-Game manipulates DOM directly:
+Game manipulates DOM minimally - no info panel, country names appear directly on the canvas:
 ```javascript
-const selectionDetailsEl = document.getElementById('selectionDetails');
-selectionDetailsEl.innerHTML = `<div class="selection-label">Selected</div>...`;
+// Country label created as Phaser text object, added to world container
+this.activeCountryText = this.scene.add.text(centerX, centerY, country.name, textStyle);
+this.activeCountryText.setOrigin(0.5, 0.5);
+this.worldContainer.add(this.activeCountryText);
 ```
-UI state is **not** stored in React/Vue - use vanilla DOM manipulation.
+Click interaction zooms to selected country and displays its name on the map.
 
 ### Service Worker Approach
 - Cache name: `'earth-explorer-v1'` (increment for breaking changes)

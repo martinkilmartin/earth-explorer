@@ -76,71 +76,44 @@ body {
   to { transform: rotate(360deg); }
 }
 
-.ui-panel {
+#resetView {
   position: absolute;
-  top: clamp(12px, 4vw, 24px);
-  left: clamp(12px, 4vw, 24px);
-  width: clamp(220px, 28vw, 340px);
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: 18px;
-  padding: clamp(16px, 3vw, 22px);
-  display: flex;
-  flex-direction: column;
-  gap: clamp(12px, 2vw, 18px);
-  z-index: 5;
-  backdrop-filter: blur(8px);
-}
-
-.ui-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.logo {
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  font-size: clamp(1rem, 2vw, 1.2rem);
-}
-
-.ui-panel button {
+  top: 16px;
+  right: 16px;
+  z-index: 10;
   border: none;
-  border-radius: 14px;
-  background: var(--accent);
+  border-radius: 50%;
+  background: rgba(31, 111, 235, 0.9);
   color: white;
-  padding: 0.45rem 0.75rem;
+  width: 48px;
+  height: 48px;
+  font-size: 24px;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.ui-panel button:active {
-  transform: scale(0.96);
-}
-
-.ui-body {
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  color: var(--text-muted);
-  font-size: clamp(0.9rem, 1.8vw, 1rem);
+  align-items: center;
+  justify-content: center;
 }
 
-#selectionDetails {
-  min-height: 3.6rem;
-  color: var(--text-primary);
-  font-weight: 500;
-  line-height: 1.4;
+#resetView:hover {
+  background: rgba(31, 111, 235, 1);
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
-@media (max-width: 768px) {
-  .ui-panel {
-    width: min(92vw, 360px);
-    left: 50%;
-    transform: translateX(-50%);
-    border-radius: 20px;
+#resetView:active {
+  transform: scale(0.95);
+}
+
+@media (min-width: 600px) {
+  #resetView {
+    width: 56px;
+    height: 56px;
+    font-size: 28px;
+    top: 20px;
+    right: 20px;
   }
 }
