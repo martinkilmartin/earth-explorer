@@ -542,21 +542,39 @@ export class EarthExplorerGame {
   zoomToCountry(country, centerX, centerY) {
     if (!this.scene || !this.scene.scale) return;
     
-    // Calculate bounds of the country
-    let minX = Infinity, maxX = -Infinity;
-    let minY = Infinity, maxY = -Infinity;
-    
-    country.segments.forEach(segment => {
+    // Calculate bounds for each segment separately to handle countries that wrap around
+    const segmentBounds = country.segments.map(segment => {
+      let minX = Infinity, maxX = -Infinity;
+      let minY = Infinity, maxY = -Infinity;
+      
       segment.points.forEach(point => {
         minX = Math.min(minX, point.x);
         maxX = Math.max(maxX, point.x);
         minY = Math.min(minY, point.y);
         maxY = Math.max(maxY, point.y);
       });
+      
+      return {
+        minX, maxX, minY, maxY,
+        width: maxX - minX,
+        height: maxY - minY,
+        centerX: (minX + maxX) / 2,
+        centerY: (minY + maxY) / 2
+      };
     });
     
-    const countryWidth = maxX - minX;
-    const countryHeight = maxY - minY;
+    // Find the largest segment (main landmass) to zoom to
+    // This avoids the wrap-around issue with countries like Russia and USA
+    const largestSegment = segmentBounds.reduce((largest, current) => {
+      const currentArea = current.width * current.height;
+      const largestArea = largest.width * largest.height;
+      return currentArea > largestArea ? current : largest;
+    });
+    
+    const countryWidth = largestSegment.width;
+    const countryHeight = largestSegment.height;
+    const segmentCenterX = largestSegment.centerX;
+    const segmentCenterY = largestSegment.centerY;
     
     // Calculate zoom to fit country with some padding
     const screenWidth = this.scene.scale.width;
@@ -576,9 +594,9 @@ export class EarthExplorerGame {
     this.zoom = newZoom;
     this.worldContainer.setScale(this.zoom);
     
-    // Position the country in the center of the screen
-    this.worldContainer.x = screenWidth / 2 - centerX * this.zoom;
-    this.worldContainer.y = screenHeight / 2 - centerY * this.zoom;
+    // Position the largest segment in the center of the screen
+    this.worldContainer.x = screenWidth / 2 - segmentCenterX * this.zoom;
+    this.worldContainer.y = screenHeight / 2 - segmentCenterY * this.zoom;
     
     this.constrainPan();
   }
