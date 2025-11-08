@@ -332,11 +332,24 @@ export class EarthExplorerGame {
           this.setHoveredCountry(null);
         });
 
+        // Double click/tap to zoom to country
+        let lastClickTime = 0;
+        const DOUBLE_CLICK_THRESHOLD = 300; // ms
+        
         graphics.on('pointerup', event => {
           if (event?.event) {
             event.event.stopPropagation();
           }
-          this.setActiveCountry(country, segment);
+          
+          const now = Date.now();
+          const timeSinceLastClick = now - lastClickTime;
+          
+          if (timeSinceLastClick < DOUBLE_CLICK_THRESHOLD) {
+            // Double click detected
+            this.setActiveCountry(country, segment);
+          }
+          
+          lastClickTime = now;
         });
 
         this.worldContainer.add(graphics);
@@ -517,10 +530,25 @@ export class EarthExplorerGame {
     const countryNameEl = document.getElementById('countryName');
     if (countryNameEl) {
       if (country) {
+        // Special case mappings for countries with invalid ISO codes in the dataset
+        const specialCaseMappings = {
+          'France': 'FR',
+          'Somaliland': 'SO' // Using Somalia's code as Somaliland is not officially recognized
+        };
+        
+        // Use special case mapping if available, otherwise use dataset ISO2 code
+        const isoCode = specialCaseMappings[country.name] || country.iso2;
+        
         // Convert ISO2 code to flag emoji
-        const flag = country.iso2 
-          ? String.fromCodePoint(...[...country.iso2.toUpperCase()].map(c => 0x1F1E6 - 65 + c.charCodeAt(0)))
+        // Skip invalid codes like "-99" or codes with non-letter characters
+        const isValidIso2 = isoCode && 
+          isoCode.length === 2 && 
+          /^[A-Z]{2}$/i.test(isoCode);
+        
+        const flag = isValidIso2
+          ? String.fromCodePoint(...[...isoCode.toUpperCase()].map(c => 0x1F1E6 - 65 + c.charCodeAt(0)))
           : '';
+        
         countryNameEl.textContent = flag ? `${flag} ${country.name}` : country.name;
       } else {
         countryNameEl.textContent = 'Click a country';
@@ -632,9 +660,15 @@ export class EarthExplorerGame {
       let outlineAlpha = 0.18;
 
       if (country === activeCountry) {
+        // Active country: highlighted
         fillColor = country.highlightColor;
         outlineAlpha = 0.38;
+      } else if (activeCountry) {
+        // When a country is active, grey out all others by darkening
+        fillColor = Phaser.Display.Color.IntegerToColor(country.baseColor).clone().darken(40).color;
+        outlineAlpha = 0.12;
       } else if (country === hoveredCountry) {
+        // Hover state when no country is active
         fillColor = Phaser.Display.Color.IntegerToColor(country.baseColor).clone().lighten(28).color;
         outlineAlpha = 0.26;
       }

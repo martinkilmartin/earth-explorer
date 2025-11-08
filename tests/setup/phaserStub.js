@@ -10,6 +10,11 @@ const createColor = value => ({
     const increment = Math.floor(amount * 1000);
     this.color = Math.min(0xffffff, this.color + increment);
     return this;
+  },
+  darken(amount) {
+    const decrement = Math.floor(amount * 1000);
+    this.color = Math.max(0, this.color - decrement);
+    return this;
   }
 });
 

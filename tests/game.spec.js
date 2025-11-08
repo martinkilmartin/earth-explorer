@@ -431,6 +431,40 @@ describe('bootstrapGame', () => {
     expect(clearedText).toBe('Click a country');
   });
 
+  it('handles invalid ISO codes gracefully (no flag emoji)', () => {
+    // Create a mock country with invalid ISO code like France and Somaliland in the dataset
+    const worldGeoJson = {
+      type: 'FeatureCollection',
+      features: [{
+        type: 'Feature',
+        properties: {
+          name: 'Test Country',
+          'ISO3166-1-Alpha-3': '-99',
+          'ISO3166-1-Alpha-2': '-99'
+        },
+        geometry: {
+          type: 'Polygon',
+          coordinates: [[
+            [0, 0], [1, 0], [1, 1], [0, 1], [0, 0]
+          ]]
+        }
+      }]
+    };
+    
+    const game = new EarthExplorerGame(worldGeoJson);
+    game.prepareWorldAtlas();
+    const country = game.projectedCountries[0];
+    
+    game.setActiveCountry(country);
+    
+    const countryNameEl = document.getElementById('countryName');
+    const infoPanelText = countryNameEl?.textContent || '';
+    
+    // Should contain only country name, no emoji
+    expect(infoPanelText).toBe('Test Country');
+    expect(infoPanelText).not.toMatch(/🇦|🇧|🇨/); // No flag emojis
+  });
+
   it('zooms to specific segment when clicked (overseas territories)', () => {
     const worldGeoJson = buildWorldCollection('FRA'); // France has overseas territories
     const game = new EarthExplorerGame(worldGeoJson);
