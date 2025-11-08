@@ -12,6 +12,7 @@ if (!Phaser) {
 
 const loadingScreenEl = document.getElementById('loadingScreen');
 const resetViewBtn = document.getElementById('resetView');
+const countryNameEl = document.getElementById('countryName');
 
 /**
  * @typedef {Object} ProjectedSegment
@@ -511,6 +512,19 @@ export class EarthExplorerGame {
     if (this.activeCountryText) {
       this.activeCountryText.destroy();
       this.activeCountryText = null;
+    }
+    
+    // Update info panel
+    if (countryNameEl) {
+      if (country) {
+        // Convert ISO2 code to flag emoji
+        const flag = country.iso2 
+          ? String.fromCodePoint(...[...country.iso2.toUpperCase()].map(c => 0x1F1E6 - 65 + c.charCodeAt(0)))
+          : '';
+        countryNameEl.textContent = flag ? `${flag} ${country.name}` : country.name;
+      } else {
+        countryNameEl.textContent = 'Click a country';
+      }
     }
     
     if (country && this.scene && this.scene.scale) {

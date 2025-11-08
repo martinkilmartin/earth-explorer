@@ -76,6 +76,43 @@ body {
   to { transform: rotate(360deg); }
 }
 
+.country-info {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  background: rgba(3, 21, 34, 0.85);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  padding: 12px 16px;
+  border: 1px solid rgba(31, 111, 235, 0.35);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  max-width: calc(100vw - 120px);
+}
+
+#countryName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 600px) {
+  .country-info {
+    top: 20px;
+    left: 20px;
+    padding: 14px 20px;
+  }
+  
+  #countryName {
+    font-size: 16px;
+  }
+}
+
 #resetView {
   position: absolute;
   top: 16px;
