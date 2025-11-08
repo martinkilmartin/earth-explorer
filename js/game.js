@@ -12,7 +12,6 @@ if (!Phaser) {
 
 const loadingScreenEl = document.getElementById('loadingScreen');
 const resetViewBtn = document.getElementById('resetView');
-const countryNameEl = document.getElementById('countryName');
 
 /**
  * @typedef {Object} ProjectedSegment
@@ -515,6 +514,7 @@ export class EarthExplorerGame {
     }
     
     // Update info panel
+    const countryNameEl = document.getElementById('countryName');
     if (countryNameEl) {
       if (country) {
         // Convert ISO2 code to flag emoji

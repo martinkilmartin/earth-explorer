@@ -1,12 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-const CACHE_NAME = 'earth-explorer-v1';
+const CACHE_NAME = 'earth-explorer-v3';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
   '/manifest.json',
   '/css/style.css',
   '/js/game.js',
+  '/js/countryColors.js',
   '/assets/world.geo.json',
   'https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js'
 ];

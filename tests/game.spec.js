@@ -65,6 +65,15 @@ describe('EarthExplorerGame', () => {
       loading.style = { opacity: '', pointerEvents: '' };
       loading.remove = vi.fn();
     }
+    
+    // Set up countryName element if it doesn't exist and reset it
+    let countryNameEl = document.getElementById('countryName');
+    if (!countryNameEl) {
+      countryNameEl = document.createElement('span');
+      countryNameEl.id = 'countryName';
+      document.body.appendChild(countryNameEl);
+    }
+    countryNameEl.textContent = ''; // Reset for each test
   });
 
   it('projects GeoJSON data into normalized segments and world bounds', () => {
@@ -397,6 +406,70 @@ describe('EarthExplorerGame', () => {
 });
 
 describe('bootstrapGame', () => {
+  it('updates info panel with country name and flag emoji', () => {
+    const worldGeoJson = buildWorldCollection('USA');
+    const game = new EarthExplorerGame(worldGeoJson);
+
+    game.prepareWorldAtlas();
+    const country = game.projectedCountries[0];
+
+    // Set active country - this should update the DOM element
+    game.setActiveCountry(country);
+    
+    // Get the element content after update
+    const countryNameEl = document.getElementById('countryName');
+    const infoPanelText = countryNameEl?.textContent || '';
+    
+    // Should contain country name and flag emoji (��)
+    expect(infoPanelText).toContain('United States of America');
+    expect(infoPanelText.length).toBeGreaterThan('United States of America'.length); // Flag adds characters
+    expect(infoPanelText).toMatch(/🇺🇸/); // US flag emoji
+
+    // Clear selection
+    game.setActiveCountry(null);
+    const clearedText = countryNameEl?.textContent || '';
+    expect(clearedText).toBe('Click a country');
+  });
+
+  it('zooms to specific segment when clicked (overseas territories)', () => {
+    const worldGeoJson = buildWorldCollection('FRA'); // France has overseas territories
+    const game = new EarthExplorerGame(worldGeoJson);
+    
+    game.scene = {
+      scale: { width: 1920, height: 1080 }
+    };
+    game.worldContainer = new ContainerStub();
+    game.prepareWorldAtlas();
+    
+    const country = game.projectedCountries[0];
+    if (country.segments.length > 1) {
+      const firstSegment = country.segments[0];
+      const secondSegment = country.segments[1];
+      
+      // Calculate centers for comparison
+      const getSegmentCenter = (segment) => {
+        let totalX = 0, totalY = 0;
+        segment.points.forEach(p => { totalX += p.x; totalY += p.y; });
+        return { x: totalX / segment.points.length, y: totalY / segment.points.length };
+      };
+      
+      const center1 = getSegmentCenter(firstSegment);
+      const center2 = getSegmentCenter(secondSegment);
+      
+      // Zoom to first segment
+      game.zoomToCountry(country, center1.x, center1.y, firstSegment);
+      const pos1 = { x: game.worldContainer.x, y: game.worldContainer.y };
+      
+      // Zoom to second segment
+      game.zoomToCountry(country, center2.x, center2.y, secondSegment);
+      const pos2 = { x: game.worldContainer.x, y: game.worldContainer.y };
+      
+      // Positions should be different when zooming to different segments
+      const moved = Math.abs(pos1.x - pos2.x) > 1 || Math.abs(pos1.y - pos2.y) > 1;
+      expect(moved).toBe(true);
+    }
+  });
+
   it('loads data and returns an initialised game instance', async () => {
     const originalFetch = globalThis.fetch;
     const originalGameClass = window.Phaser.Game;

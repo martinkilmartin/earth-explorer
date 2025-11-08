@@ -31,8 +31,12 @@ test.describe('Earth Explorer UI smoke tests', () => {
     expect(knownCountry).not.toBeNull();
   });
 
-  test('zooms to country and displays label on selection', async ({ page }) => {
-    const { zoomChanged, hasText, countryName } = await page.evaluate(() => {
+  test('zooms to country and displays info panel on selection', async ({ page }) => {
+    // Check info panel shows default text
+    const defaultText = await page.locator('#countryName').textContent();
+    expect(defaultText).toBe('Click a country');
+
+    const { zoomChanged, countryName, countryIso2 } = await page.evaluate(() => {
       const game = window.__EARTH_EXPLORER_GAME__;
       const target = game.projectedCountries.find(country => country.iso3 === 'JPN') ?? game.projectedCountries[0];
       
@@ -42,14 +46,19 @@ test.describe('Earth Explorer UI smoke tests', () => {
       
       return {
         zoomChanged: Math.abs(before - after) > 0.001,
-        hasText: game.activeCountryText !== null,
-        countryName: target.name
+        countryName: target.name,
+        countryIso2: target.iso2
       };
     });
 
     expect(zoomChanged).toBe(true);
-    expect(hasText).toBe(true);
     expect(countryName).toBeTruthy();
+
+    // Check info panel shows country with flag emoji
+    const infoPanelText = await page.locator('#countryName').textContent();
+    expect(infoPanelText).toContain(countryName);
+    // Verify flag emoji is present (it will be 2 characters long for regional indicators)
+    expect(infoPanelText.length).toBeGreaterThan(countryName.length);
 
     // Clear selection
     await page.evaluate(() => {
@@ -57,14 +66,8 @@ test.describe('Earth Explorer UI smoke tests', () => {
       game.setActiveCountry(null);
     });
 
-    const { hasTextAfterClear } = await page.evaluate(() => {
-      const game = window.__EARTH_EXPLORER_GAME__;
-      return {
-        hasTextAfterClear: game.activeCountryText !== null
-      };
-    });
-
-    expect(hasTextAfterClear).toBe(false);
+    const textAfterClear = await page.locator('#countryName').textContent();
+    expect(textAfterClear).toBe('Click a country');
   });
 
   test('supports zoom controls and reset view button', async ({ page }) => {
