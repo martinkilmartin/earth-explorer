@@ -336,7 +336,7 @@ export class EarthExplorerGame {
           if (event?.event) {
             event.event.stopPropagation();
           }
-          this.setActiveCountry(country);
+          this.setActiveCountry(country, segment);
         });
 
         this.worldContainer.add(graphics);
@@ -504,7 +504,7 @@ export class EarthExplorerGame {
     this.refreshCountryStyles();
   }
 
-  setActiveCountry(country) {
+  setActiveCountry(country, clickedSegment = null) {
     this.activeCountry = country;
     
     // Remove existing country text if any
@@ -514,12 +514,15 @@ export class EarthExplorerGame {
     }
     
     if (country && this.scene && this.scene.scale) {
-      // Calculate country center from all segments
+      // If a specific segment was clicked, use that segment for zoom
+      // Otherwise calculate center from all segments
+      const segmentsToUse = clickedSegment ? [clickedSegment] : country.segments;
+      
       let totalX = 0;
       let totalY = 0;
       let totalPoints = 0;
       
-      country.segments.forEach(segment => {
+      segmentsToUse.forEach(segment => {
         segment.points.forEach(point => {
           totalX += point.x;
           totalY += point.y;
@@ -531,19 +534,23 @@ export class EarthExplorerGame {
         const centerX = totalX / totalPoints;
         const centerY = totalY / totalPoints;
         
-        // Zoom to country
-        this.zoomToCountry(country, centerX, centerY);
+        // Zoom to the clicked segment (or all segments if none specified)
+        this.zoomToCountry(country, centerX, centerY, clickedSegment);
       }
     }
     
     this.refreshCountryStyles();
   }
   
-  zoomToCountry(country, centerX, centerY) {
+  zoomToCountry(country, centerX, centerY, clickedSegment = null) {
     if (!this.scene || !this.scene.scale) return;
     
+    // If a specific segment was clicked, only use that segment
+    // Otherwise, calculate bounds for all segments to find the largest
+    const segmentsToConsider = clickedSegment ? [clickedSegment] : country.segments;
+    
     // Calculate bounds for each segment separately to handle countries that wrap around
-    const segmentBounds = country.segments.map(segment => {
+    const segmentBounds = segmentsToConsider.map(segment => {
       let minX = Infinity, maxX = -Infinity;
       let minY = Infinity, maxY = -Infinity;
       
@@ -564,7 +571,8 @@ export class EarthExplorerGame {
     });
     
     // Find the largest segment (main landmass) to zoom to
-    // This avoids the wrap-around issue with countries like Russia and USA
+    // For clicked segments, this will be the clicked segment itself
+    // For countries like Russia/USA, this avoids the wrap-around issue
     const largestSegment = segmentBounds.reduce((largest, current) => {
       const currentArea = current.width * current.height;
       const largestArea = largest.width * largest.height;
