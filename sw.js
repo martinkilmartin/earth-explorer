@@ -1,6 +1,6 @@
 // @ts-check
 
-const CACHE_NAME = 'earth-explorer-v5';
+const CACHE_NAME = 'earth-explorer-v6';
 const PRECACHE_URLS = [
   './',
   './index.html',

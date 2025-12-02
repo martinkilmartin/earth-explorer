@@ -332,24 +332,11 @@ export class EarthExplorerGame {
           this.setHoveredCountry(null);
         });
 
-        // Double click/tap to zoom to country
-        let lastClickTime = 0;
-        const DOUBLE_CLICK_THRESHOLD = 300; // ms
-        
         graphics.on('pointerup', event => {
           if (event?.event) {
             event.event.stopPropagation();
           }
-          
-          const now = Date.now();
-          const timeSinceLastClick = now - lastClickTime;
-          
-          if (timeSinceLastClick < DOUBLE_CLICK_THRESHOLD) {
-            // Double click detected
-            this.setActiveCountry(country, segment);
-          }
-          
-          lastClickTime = now;
+          this.setActiveCountry(country, segment);
         });
 
         this.worldContainer.add(graphics);

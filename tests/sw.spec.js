@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-const CACHE_NAME = 'earth-explorer-v5';
+const CACHE_NAME = 'earth-explorer-v6';
 const PRECACHE_URLS = [
   './',
   './index.html',
