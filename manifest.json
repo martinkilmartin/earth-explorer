@@ -2,11 +2,11 @@
   "name": "Earth Explorer",
   "short_name": "Explorer",
   "description": "Progressive world exploration sandbox",
-  "start_url": "/",
-  "display": "standalone",
+  "start_url": "./",
+  "display": "fullscreen",
   "background_color": "#0b1c2c",
   "theme_color": "#1f6feb",
-  "orientation": "landscape-primary",
+  "orientation": "any",
   "icons": [
     {
       "src": "icons/icon-192.png",
