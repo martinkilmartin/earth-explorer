@@ -1,0 +1,250 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background: linear-gradient(135deg, #0b1c2c 0%, #1a3a52 100%);
+  overflow: hidden;
+  touch-action: none;
+}
+
+#mapContainer {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#mapViewport {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+#mapViewport.dragging {
+  cursor: grabbing;
+}
+
+#mapViewport svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+/* Country styles */
+#mapViewport path {
+  fill: #2c5f8d;
+  stroke: #ffffff;
+  stroke-width: 0.5;
+  stroke-opacity: 0.18;
+  transition: fill 0.2s ease, stroke-opacity 0.2s ease;
+  cursor: pointer;
+}
+
+#mapViewport path:hover {
+  fill: #3d7ab8;
+  stroke-opacity: 0.35;
+}
+
+#mapViewport path.active {
+  fill: #1f6feb !important;
+  stroke-opacity: 0.5 !important;
+}
+
+#mapViewport path.inactive {
+  fill: #1a3a52 !important;
+  stroke-opacity: 0.12 !important;
+}
+
+/* Info panel */
+.country-info {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(3, 21, 34, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 16px 24px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e6edf3;
+  font-size: 18px;
+  font-weight: 500;
+  z-index: 10;
+  pointer-events: none;
+  max-width: calc(100vw - 120px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Reset button */
+#resetView {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(31, 111, 235, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #e6edf3;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+#resetView:hover {
+  background: rgba(31, 111, 235, 0.35);
+  transform: scale(1.05);
+}
+
+#resetView:active {
+  transform: scale(0.95);
+}
+
+/* Action bar */
+.action-bar {
+  position: absolute;
+  display: flex;
+  gap: 12px;
+  z-index: 10;
+  background: rgba(3, 21, 34, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+@media (orientation: portrait) {
+  .action-bar {
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: row;
+  }
+}
+
+@media (orientation: landscape) {
+  .action-bar {
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+    flex-direction: column;
+  }
+}
+
+.action-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(31, 111, 235, 0.2);
+  color: #e6edf3;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn:hover {
+  background: rgba(31, 111, 235, 0.35);
+  transform: scale(1.05);
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+}
+
+@media (min-width: 600px) {
+  .action-btn {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+  
+  #resetView {
+    width: 56px;
+    height: 56px;
+  }
+}
+
+/* Loading screen */
+.loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0b1c2c 0%, #1a3a52 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
+
+.loading.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(31, 111, 235, 0.2);
+  border-top-color: #1f6feb;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 24px;
+  color: #e6edf3;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* Attribution */
+.attribution {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  font-size: 11px;
+  color: rgba(230, 237, 243, 0.5);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.attribution a {
+  color: rgba(31, 111, 235, 0.7);
+  text-decoration: none;
+  pointer-events: all;
+}
+
+.attribution a:hover {
+  color: rgba(31, 111, 235, 1);
+}

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#1f6feb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/svg-style.css">
+  <title>Earth Explorer (SVG)</title>
+</head>
+<body>
+  <div id="mapContainer">
+    <div id="countryInfo" class="country-info">
+      <span id="countryName">Click a country</span>
+    </div>
+    <button id="resetView" aria-label="Reset view">⟳</button>
+    <nav id="actionBar" class="action-bar">
+      <button class="action-btn" aria-label="Search" title="Search">🔍</button>
+      <button class="action-btn" aria-label="Bookmark" title="Bookmark">⭐</button>
+      <button class="action-btn" aria-label="Share" title="Share">📤</button>
+      <button class="action-btn" aria-label="Settings" title="Settings">⚙️</button>
+      <button class="action-btn" aria-label="Info" title="Info">ℹ️</button>
+    </nav>
+    <div id="mapViewport">
+      <!-- SVG will be loaded here -->
+    </div>
+    <div class="attribution">
+      Map: <a href="https://github.com/flekschas/simple-world-map" target="_blank">simple-world-map</a> (CC BY-SA 3.0)
+    </div>
+    <div class="loading" id="loadingScreen">
+      <div class="spinner"></div>
+      <div class="loading-text">Loading world map…</div>
+    </div>
+  </div>
+
+  <script src="js/svg-map.js" type="module"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        const swPath = './sw.js';
+        navigator.serviceWorker.register(swPath).catch(err => {
+          console.warn('Service worker registration failed', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
