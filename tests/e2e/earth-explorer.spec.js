@@ -109,4 +109,32 @@ test.describe('Earth Explorer UI smoke tests', () => {
 
     expect(registered).toBe(true);
   });
+
+  test('has mobile-optimized meta tags for full-screen experience', async ({ page }) => {
+    // Check viewport meta tag prevents user scaling
+    const viewport = await page.locator('meta[name="viewport"]').getAttribute('content');
+    expect(viewport).toContain('user-scalable=no');
+    expect(viewport).toContain('maximum-scale=1.0');
+    expect(viewport).toContain('viewport-fit=cover');
+
+    // Check Apple mobile web app capable
+    const appleMobileCapable = await page.locator('meta[name="apple-mobile-web-app-capable"]').getAttribute('content');
+    expect(appleMobileCapable).toBe('yes');
+
+    // Check Android mobile web app capable
+    const mobileWebAppCapable = await page.locator('meta[name="mobile-web-app-capable"]').getAttribute('content');
+    expect(mobileWebAppCapable).toBe('yes');
+
+    // Verify manifest link exists
+    const manifestLink = await page.locator('link[rel="manifest"]').getAttribute('href');
+    expect(manifestLink).toBe('manifest.json');
+
+    // Fetch and verify manifest.json settings
+    const manifestResponse = await page.goto('/manifest.json');
+    const manifestJson = await manifestResponse.json();
+    
+    expect(manifestJson.display).toBe('fullscreen');
+    expect(manifestJson.orientation).toBe('any');
+    expect(manifestJson.start_url).toBe('./');
+  });
 });
