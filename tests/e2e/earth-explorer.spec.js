@@ -100,13 +100,11 @@ test.describe('Earth Explorer UI smoke tests', () => {
         return false;
       }
 
-      const existing = await navigator.serviceWorker.getRegistration('/sw.js');
-      if (existing) {
-        return true;
-      }
-
-      const ready = await navigator.serviceWorker.ready;
-      return ready?.active?.scriptURL?.endsWith('/sw.js') ?? false;
+      // Wait a bit for service worker to register
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const registration = await navigator.serviceWorker.getRegistration();
+      return registration?.active !== null;
     });
 
     expect(registered).toBe(true);

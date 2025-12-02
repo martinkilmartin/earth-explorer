@@ -36,7 +36,9 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(err => {
+        // Use relative path for service worker to work in subdirectories
+        const swPath = './sw.js';
+        navigator.serviceWorker.register(swPath).catch(err => {
           console.warn('Service worker registration failed', err);
         });
       });

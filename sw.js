@@ -2,13 +2,13 @@
 
 const CACHE_NAME = 'earth-explorer-v5';
 const PRECACHE_URLS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/css/style.css',
-  '/js/game.js',
-  '/js/countryColors.js',
-  '/assets/world.geo.json',
+  './',
+  './index.html',
+  './manifest.json',
+  './css/style.css',
+  './js/game.js',
+  './js/countryColors.js',
+  './assets/world.geo.json',
   'https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js'
 ];
 
