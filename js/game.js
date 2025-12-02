@@ -62,6 +62,8 @@ export class EarthExplorerGame {
     this.isDragging = false;
     this.isPinching = false;
     this.lastPointerPosition = null;
+    this.pointerDownPosition = null;
+    this.hasDragged = false;
     this.startPinchDistance = null;
     this.startPinchZoom = null;
     this.worldBounds = new Phaser.Geom.Rectangle(0, 0, 0, 0);
@@ -333,6 +335,11 @@ export class EarthExplorerGame {
         });
 
         graphics.on('pointerup', event => {
+          // Only register as click if user didn't drag
+          if (this.hasDragged) {
+            return;
+          }
+          
           if (event?.event) {
             event.event.stopPropagation();
           }
@@ -372,6 +379,7 @@ export class EarthExplorerGame {
   setupInputHandlers() {
     const scene = this.scene;
     const input = scene.input;
+    const DRAG_THRESHOLD = 5; // pixels - movement less than this is considered a tap
 
     input.on('pointerdown', pointer => {
       const activePointers = this.getActivePointers();
@@ -380,14 +388,18 @@ export class EarthExplorerGame {
         this.startPinchDistance = null;
         this.startPinchZoom = this.zoom;
         this.isDragging = false;
+        this.hasDragged = false;
       } else {
         this.isDragging = true;
+        this.hasDragged = false;
+        this.pointerDownPosition = { x: pointer.x, y: pointer.y };
         this.lastPointerPosition = { x: pointer.x, y: pointer.y };
       }
     });
 
     input.on('pointerup', () => {
       this.isDragging = false;
+      this.pointerDownPosition = null;
       const activePointers = this.getActivePointers();
       if (activePointers.length < 2) {
         this.isPinching = false;
@@ -401,6 +413,16 @@ export class EarthExplorerGame {
 
       const deltaX = pointer.x - this.lastPointerPosition.x;
       const deltaY = pointer.y - this.lastPointerPosition.y;
+
+      // Check if pointer has moved beyond threshold
+      if (this.pointerDownPosition && !this.hasDragged) {
+        const totalDeltaX = pointer.x - this.pointerDownPosition.x;
+        const totalDeltaY = pointer.y - this.pointerDownPosition.y;
+        const distance = Math.sqrt(totalDeltaX * totalDeltaX + totalDeltaY * totalDeltaY);
+        if (distance > DRAG_THRESHOLD) {
+          this.hasDragged = true;
+        }
+      }
 
       this.worldContainer.x += deltaX;
       this.worldContainer.y += deltaY;
